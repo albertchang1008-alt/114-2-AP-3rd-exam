@@ -642,11 +642,8 @@ function handleLogin() {
     hide("login-section");
     renderTopics();
     show("topic-section");
-    // 排行已在載入時顯示，登入後確保繼續顯示（若有設定）
-    if (completionSettings.completionTopics?.length > 0 && rankingData) {
-        show("ranking-section");
-    }
-    // ★ 登入後顯示個人完成度
+    // ★ 登入後隱藏班級排行，只顯示個人完成度
+    hide("ranking-section");
     if (completionSettings.completionTopics?.length > 0) {
         loadMyCompletion();
     }
@@ -757,6 +754,7 @@ async function loadAndStartQuiz(topic) {
     isRetryMode = false;
     attemptCount++;
     hide("topic-section");
+    hide("my-completion-section"); // ★ 進入答題後隱藏完成度
     // 顯示載入中（借用 submitting-section）
     document.querySelector("#submitting-section h2").textContent = "正在載入題目...";
     document.querySelector("#submitting-section p").textContent  = "請稍候";
@@ -777,6 +775,7 @@ async function loadAndStartQuiz(topic) {
 async function loadAndStartFlashcard(topic) {
     currentSelectedTopic = topic;
     hide("topic-section");
+    hide("my-completion-section"); // ★ 進入閃卡後隱藏完成度
     show("flashcard-loading-section");
     try {
         await loadTopicQuestions(topic, true); // flashcard=true 回傳答案
@@ -1397,13 +1396,9 @@ function backToTopics() {
     hide("flashcard-done-section");
     hide("flashcard-loading-section");
     show("topic-section");
-    // 已登入且有設定完成度 → 重新整理個人完成度（可能剛測完有更新）
+    // ★ 回到首頁：只顯示我的完成度，不顯示班級排行
     if (studentId && completionSettings.completionTopics?.length > 0) {
-        loadMyCompletion();
-        show("my-completion-section");
-    }
-    if (completionSettings.completionTopics?.length > 0 && rankingData) {
-        show("ranking-section");
+        loadMyCompletion(); // 可能剛測完有更新，重新整理
     }
     window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -1531,6 +1526,7 @@ async function startComboQuiz() {
     attemptCount++;
 
     hide("topic-section");
+    hide("my-completion-section"); // ★ 進入答題後隱藏完成度
     document.querySelector("#submitting-section h2").textContent = "正在載入題目...";
     document.querySelector("#submitting-section p").textContent  = "請稍候";
     show("submitting-section");
