@@ -2013,7 +2013,16 @@ function renderFilteredQuestions(list) {
                 const optCounts   = q.optionCounts || {};
                 const correctText = (q.correctText || "").replace(/^([1-4]|[A-D])[.\-、\s]*/i,"").trim().toLowerCase();
                 const optTotal    = q.total || 1;
-                const optEntries  = Object.entries(optCounts).sort((a,b)=>b[1]-a[1]);
+                // ★ 正確答案也做同樣清理，確保比對一致
+                const cleanCorrectText = (correctText || "")
+                    .replace(/^([1-4]|[A-D])[.\-、\s]*/i,"").trim().toLowerCase()
+                    .replace(/\s+/g," "); // 統一多餘空白
+                // ★ 過濾掉「未作答」，並按人次排序
+                const optEntries  = Object.entries(optCounts)
+                    .filter(([opt]) => opt && opt !== "未作答")
+                    .sort((a,b)=>b[1]-a[1]);
+                // ★ 只標記一個正確答案（第一個比對到的）
+                let correctMarked = false;
                 const LABELS      = ["A","B","C","D","E"];
                 const optBarsHtml = optEntries.length > 0 ? `
                     <div class="mt-3 border-t border-gray-100 pt-3">
@@ -2022,8 +2031,10 @@ function renderFilteredQuestions(list) {
                         ${optEntries.map(([opt, cnt], idx) => {
                             const pct      = Math.round((cnt / optTotal) * 100);
                             const label    = LABELS[idx] || (idx+1);
-                            const cleanOpt = opt.replace(/^([1-4]|[A-D])[.\-、\s]*/i,"").trim().toLowerCase();
-                            const isCorrect = correctText && cleanOpt === correctText;
+                            const cleanOpt = opt.replace(/^([1-4]|[A-D])[.\-、\s]*/i,"").trim().toLowerCase().replace(/\s+/g," ");
+                            // ★ 只標記一次正確答案，避免重複標記
+                            const isCorrect = !correctMarked && cleanCorrectText && cleanOpt === cleanCorrectText;
+                            if (isCorrect) correctMarked = true;
                             const rowCls   = isCorrect ? "text-green-700 font-semibold" : "text-gray-600";
                             const badge    = isCorrect ? `<span class="ml-1 text-green-600 text-xs">✓ 正確答案</span>` : "";
                             return `<div class="flex items-start gap-2 text-xs ${rowCls}">
