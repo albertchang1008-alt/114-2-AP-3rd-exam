@@ -842,6 +842,7 @@ function prepareQuiz(sources) {
     currentQuestionIndex = 0;
 
     hide("topic-section"); hide("result-section"); hide("submitting-section");
+    hide("my-completion-section"); // ★ 進入題目後隱藏完成度
     show("quiz-section");
     hide("finish-btn-area");
     document.getElementById("quiz-topic-title").textContent = currentSelectedTopic;
