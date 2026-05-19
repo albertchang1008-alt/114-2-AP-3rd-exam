@@ -816,6 +816,7 @@ function startFullQuiz(topic) { loadAndStartQuiz(topic); } // 相容舊呼叫
 function startRetry() {
     isRetryMode = true;
     attemptCount++;
+    hide("my-completion-section"); // ★ 進入錯題重做後隱藏完成度
     const srcs = quizSession
         .filter(q => !q.isCorrectlyAnswered)
         .map(q => allQuestionsData.find(o => o.id === q.id))
